@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Services{% endblock %}
+
+{% block content %}
+<h1>Available Services</h1>
+
+{% for service in services %}
+    <div>
+        <h3>{{ service.title }}</h3>
+        <p>Category: {{ service.category }}</p>
+        <p>Provider: {{ service.provider }}</p>
+        <p>Price: {{ service.price }}</p>
+    </div>
+    <hr>
+{% else %}
+    <p>No services available right now.</p>
+{% endfor %}
+{% endblock %}
