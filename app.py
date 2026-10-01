@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
 
 app = Flask(__name__)
 
@@ -11,6 +11,17 @@ services = [
 @app.route('/')
 def home():
     return render_template('home.html', services=services)
+
+@app.route('/service/<int:service_id>')
+def service_detail(service_id):
+    service = next((s for s in services if s['id'] == service_id), None)
+    if service is None:
+        abort(404)
+    return render_template('service_detail.html', service=service)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__=='__main__':
     app.run(debug=True)
