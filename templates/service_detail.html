@@ -7,5 +7,6 @@
 <p>Category: {{ service.category }}</p>
 <p>Provider: {{ service.provider }}</p>
 <p>Price: {{ service.price }}</p>
+<a href="{{ url_for('request_service', service_id=service.id) }}">Request this service</a><br>
 <a href="{{ url_for('home') }}">Back to all services</a>
 {% endblock %}
