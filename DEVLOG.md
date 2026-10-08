@@ -30,3 +30,26 @@ match, not just which items to visit.
 Then I tested it by visiting a service that doesn't exist yet, like /service/99,
 to check if the program handles that gracefully. It correctly showed the 404
 page.
+
+---------------------------------------------------------------------------------
+
+## Day 3: Service request form
+
+I added a request form to each service using Flask-WTF. `RequestForm` in
+`forms.py` uses `DataRequired` and `Length` validators, and I moved the
+"find the service or abort(404)" lookup into a helper, `get_service_or_404`,
+since two routes needed it.
+
+My first empty-form test only showed "Please fill out this field". That is the
+browser's own check, so it never reached Flask and proved nothing about my
+validation. I added `novalidate` to the form tag to switch it off, and then
+WTForms returned "This field is required." and the `Length` error for a short
+message, which confirmed the server-side validation works. The fields I had
+already filled stayed in place after an error because the form object holds the
+submitted data. I removed `novalidate` afterwards, so users still get the
+browser check, but the server check is the one that protects the app.
+
+After a valid submit the route redirects to the detail page (Post/Redirect/Get)
+and shows a flash message, so refreshing the page can't save the request twice.
+Requests are stored in an in-memory list, so they disappear whenever the app
+restarts. That is the reason I will be adding a database later.
