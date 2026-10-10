@@ -53,3 +53,22 @@ After a valid submit the route redirects to the detail page (Post/Redirect/Get)
 and shows a flash message, so refreshing the page can't save the request twice.
 Requests are stored in an in-memory list, so they disappear whenever the app
 restarts. That is the reason I will be adding a database later.
+
+---------------------------------------------------------------------------------
+
+## Day 4: Requests page and the in-memory problem
+
+I added a /requests page that loops over the submitted requests and shows each
+one with its service title. Each request only stores a service_id, and the view
+looks up the title from the services list, the same way a foreign key works in
+a database. With nothing submitted the page shows "No requests yet", and after
+two submissions both were listed.
+
+Then I stopped and restarted the app and the page was empty again, because the
+requests live in a plain Python list in memory. Every restart wipes them, which
+is why I will be adding a database later.
+
+One thing I noticed is that anyone can open /requests and read every client's
+name and contact. Clients should only see their own requests, providers only
+the ones for their services, and the admin everything, which needs user accounts
+and roles first.
