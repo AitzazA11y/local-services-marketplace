@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Requests{% endblock %}
+
+{% block content %}
+<h1>Service Requests</h1>
+
+{% for entry in entries %}
+    <div>
+        <h3>{{ entry.service_title }}</h3>
+        <p>From: {{ entry.client_name }}</p>
+        <p>Contact: {{ entry.contact }}</p>
+        <p>Message: {{ entry.message }}</p>
+    </div>
+    <hr>
+{% else %}
+    <p>No requests yet.</p>
+{% endfor %}
+{% endblock %}

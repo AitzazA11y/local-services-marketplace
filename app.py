@@ -28,6 +28,15 @@ def service_detail(service_id):
     service = get_service_or_404(service_id)
     return render_template('service_detail.html', service=service)
 
+@app.route('/requests')
+def view_requests():
+    entries = []
+    for r in requests_list:
+        service = next((s for s in services if s['id'] == r['service_id']), None)
+        title = service['title'] if service else 'Unknown service'
+        entries.append({**r, 'service_title': title})
+    return render_template('requests.html', entries=entries)
+
 @app.route('/service/<int:service_id>/request', methods=['GET', 'POST'])
 def request_service(service_id):
     service = get_service_or_404(service_id)
