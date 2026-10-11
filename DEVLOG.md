@@ -72,3 +72,24 @@ One thing I noticed is that anyone can open /requests and read every client's
 name and contact. Clients should only see their own requests, providers only
 the ones for their services, and the admin everything, which needs user accounts
 and roles first.
+
+---------------------------------------------------------------------------------
+
+## Day 5: Moving to a database
+
+This time, I replaced the in-memory data with a real database. I wrote models.py
+with Service and ServiceRequest using Flask-SQLAlchemy and SQLite. A request
+links to its service through a foreign key and a relationship, so
+request.service gives me the whole service object. I also added seed.py to put
+the three starting services into the database. It checks the row count first,
+so running it twice doesn't create duplicates.
+
+Then I tested saving a request for service 99, which doesn't exist. I expected
+an error, but it saved. SQLite doesn't enforce foreign keys unless you turn them
+on for each connection, so I ended up with an orphaned row pointing at a
+service that isn't there. I deleted that row and enabled enforcement with
+PRAGMA foreign_keys=ON. When I repeated the test it failed with an IntegrityError (FOREIGN KEY
+constraint failed), which is the behavior I expected the first time and is the standard behavior that databases like PostgreSQL and MySQL have by default.
+
+In the app itself, the route's 404 check catches a missing service first, and
+the database constraint is the safety net behind it.
