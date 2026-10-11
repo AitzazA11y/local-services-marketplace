@@ -1,9 +1,13 @@
 import os
 from flask import Flask, render_template, abort, redirect, url_for, flash
 from forms import RequestForm
+from models import db, Service, ServiceRequest
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db.init_app(app)
 
 requests_list = []   # stand-in for a database table, lives in memory only
 
