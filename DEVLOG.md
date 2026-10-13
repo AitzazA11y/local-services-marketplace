@@ -93,3 +93,27 @@ constraint failed), which is the behavior I expected the first time and is the s
 
 In the app itself, the route's 404 check catches a missing service first, and
 the database constraint is the safety net behind it.
+
+---------------------------------------------------------------------------------
+
+## Day 6: Routes now use the database
+
+I switched the app from the in-memory lists to the database. The home page and
+the detail page now read services with Service.query.all() and
+db.get_or_404(), which replaced my generator-expression lookup. The templates
+didn't need any change, because Jinja's service.title works on a model object
+the same way it did on a dictionary. The one place it broke was in Python code:
+service['provider'] had to become service.provider, since a model object isn't
+subscriptable.
+
+The request form now saves a ServiceRequest to the database. I wrapped the
+commit in a try/except that calls db.session.rollback() on failure, because a
+failed commit leaves the session unusable, and the user gets a friendly message
+instead of a crash page. The /requests page reads from the database too, newest
+first, and uses the relationship (entry.service.title) instead of my old
+manual title lookup.
+
+To test it I submitted two requests, restarted the app, and both were still
+there, which was the problem the in-memory list couldn't solve. After that I
+deleted the old services and requests_list from app.py, since nothing used
+them any more.
