@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, abort, redirect, url_for, flash
 from forms import RequestForm
 from models import db, Service, ServiceRequest
+from sqlalchemy.exc import SQLAlchemyError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
@@ -36,26 +37,31 @@ def service_detail(service_id):
 
 @app.route('/requests')
 def view_requests():
-    entries = []
-    for r in requests_list:
-        service = next((s for s in services if s['id'] == r['service_id']), None)
-        title = service['title'] if service else 'Unknown service'
-        entries.append({**r, 'service_title': title})
+    entries = ServiceRequest.query.order_by(ServiceRequest.id.desc()).all()
     return render_template('requests.html', entries=entries)
+
+from sqlalchemy.exc import SQLAlchemyError
 
 @app.route('/service/<int:service_id>/request', methods=['GET', 'POST'])
 def request_service(service_id):
     service = get_service_or_404(service_id)
     form = RequestForm()
     if form.validate_on_submit():
-        requests_list.append({
-            'service_id': service_id,
-            'client_name': form.client_name.data,
-            'contact': form.contact.data,
-            'message': form.message.data,
-        })
+        new_request = ServiceRequest(
+            client_name=form.client_name.data,
+            contact=form.contact.data,
+            message=form.message.data,
+            service_id=service.id,
+        )
+        try:
+            db.session.add(new_request)
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            flash("Something went wrong saving your request. Please try again.")
+            return render_template('request_form.html', form=form, service=service)
         flash(f"Your request was sent to {service.provider}.")
-        return redirect(url_for('service_detail', service_id=service_id))
+        return redirect(url_for('service_detail', service_id=service.id))
     return render_template('request_form.html', form=form, service=service)
 
 if __name__=='__main__':
