@@ -10,14 +10,6 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db.init_app(app)
 
-requests_list = []   # stand-in for a database table, lives in memory only
-
-services = [
-    {"id": 1, "title": "Home Plumbing Repair", "category": "Plumber", "provider": "Ahmed Hassan", "price": "Rs. 1500"},
-    {"id": 2, "title": "Electrical Wiring Fix", "category": "Electrician", "provider": "Bilal Khan", "price": "Rs. 2000"},
-    {"id": 3, "title": "Math Tutoring (O/A Levels)", "category": "Tutor", "provider": "Sana Malik", "price": "Rs. 800/hr"},
-]
-
 @app.route('/')
 def home():
     all_services = Service.query.all()
