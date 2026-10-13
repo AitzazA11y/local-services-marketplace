@@ -19,13 +19,15 @@ services = [
 
 @app.route('/')
 def home():
-    return render_template('home.html', services=services)
+    all_services = Service.query.all()
+    return render_template('home.html', services=all_services)
 
 def get_service_or_404(service_id):
-    service = next((s for s in services if s['id'] == service_id), None)
-    if service is None:
-        abort(404)
-    return service
+    return db.get_or_404(Service, service_id)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 @app.route('/service/<int:service_id>')
 def service_detail(service_id):
@@ -52,7 +54,7 @@ def request_service(service_id):
             'contact': form.contact.data,
             'message': form.message.data,
         })
-        flash(f"Your request was sent to {service['provider']}.")
+        flash(f"Your request was sent to {service.provider}.")
         return redirect(url_for('service_detail', service_id=service_id))
     return render_template('request_form.html', form=form, service=service)
 
