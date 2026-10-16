@@ -117,3 +117,32 @@ To test it I submitted two requests, restarted the app, and both were still
 there, which was the problem the in-memory list couldn't solve. After that I
 deleted the old services and requests_list from app.py, since nothing used
 them any more.
+
+---------------------------------------------------------------------------------
+
+## Day 7: User accounts and registration
+
+I started on authentication on a new branch, add-authentication, after merging
+the database work into main through a pull request. I added a User model with a
+name, a unique email, a password hash and a role that defaults to client. The
+table is named users on purpose, since "user" is a reserved word in PostgreSQL
+and I plan to move to it later.
+
+Passwords are never stored as typed. set_password() hashes them with Werkzeug,
+and the database only holds the hash. I first called this "encrypted", but that
+is wrong: encryption can be reversed with a key, while a hash is one-way. At
+login the app will hash what the user types and compare the two hashes.
+
+For registration I wrote a RegisterForm with Email(), a minimum password length
+and EqualTo for the confirm field. I used PasswordField, not TextAreaField, so
+the characters show as dots and the password isn't put back in the page when
+the form comes back with errors. I tested the validators from the terminal with
+bad data and got errors for the email format, the short password and the
+mismatch, which is what I expected.
+
+An email that is already taken is checked in two places. The form's
+validate_email gives the user a clear message, and unique=True on the column is
+the safety net in case two people register the same email at the same moment.
+Emails are lowercased before saving so the same address in different capitals
+counts as one account. The role is not a form field, so nobody can choose their
+own role at signup.
