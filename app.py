@@ -1,8 +1,8 @@
 import os
 from flask import Flask, render_template, abort, redirect, url_for, flash
-from forms import RequestForm
-from models import db, Service, ServiceRequest
-from sqlalchemy.exc import SQLAlchemyError
+from forms import RequestForm, RegisterForm
+from models import db, Service, ServiceRequest, User
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
@@ -55,6 +55,23 @@ def request_service(service_id):
         flash(f"Your request was sent to {service.provider}.")
         return redirect(url_for('service_detail', service_id=service.id))
     return render_template('request_form.html', form=form, service=service)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = User(name=form.name.data, email=form.email.data.lower())
+        user.set_password(form.password.data)
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('That email is already registered.')
+            return render_template('register.html', form=form)
+        flash('Account created.')
+        return redirect(url_for('home'))
+    return render_template('register.html', form=form)
 
 if __name__=='__main__':
     app.run(debug=True)
