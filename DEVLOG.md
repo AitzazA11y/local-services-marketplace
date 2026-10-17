@@ -146,3 +146,30 @@ the safety net in case two people register the same email at the same moment.
 Emails are lowercased before saving so the same address in different capitals
 counts as one account. The role is not a form field, so nobody can choose their
 own role at signup.
+
+---------------------------------------------------------------------------------
+
+## Day 8: Login, logout and protecting the request form
+
+I added login and logout with Flask-Login. After a correct login, login_user()
+stores the user's id in the session cookie, and a user_loader function loads
+the matching user on every later request. The navbar now checks current_user.is_authenticated.
+If I'm logged in it shows the user's name and a Logout link, and if not it shows Login and Register links.
+
+I put @login_required on the request form. When I visited it logged out, I was sent to the
+login page with a message instead of seeing the form. I also tried a wrong password and a 
+wrong email, and both gave the same message, "Invalid email or password." For security reasons,
+I used the same message for both cases to prevent user enumeration. If the messages were different, anyone could use the login form to find out which emails have accounts, which leaks users' private information and makes them easier to target with guessed passwords or phishing.
+
+After registering, I landed on the home page with "Account created" but I was
+not logged in, which was confusing. I changed it so registration redirects to
+the login page with "Account created. Please log in."
+
+I decided to keep browsing public, so the home page and service pages are
+visible to anyone, as on other marketplaces. Only actions and personal data
+need a login.
+
+Still open: /requests is visible to everyone and lists every client's name and
+contact. @login_required alone won't fix it, because any logged-in user would
+still see all requests. Each request has to be linked to the user who sent it,
+which needs a new column and Flask-Migrate.
